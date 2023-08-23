@@ -16,4 +16,5 @@ const errorHandler = (error, req, res, next) => {
   }
   return res.status(status).json(data);
 };
+
 module.exports = errorHandler;
