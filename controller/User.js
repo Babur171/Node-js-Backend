@@ -84,7 +84,10 @@ const UserController = {
       console.log("catch");
       return next(error);
     }
-    let accessToken = jwt.sign({ id: user._id }, SECRETTOKEN);
+    let accessToken = jwt.sign({ id: user._id }, SECRETTOKEN, {
+      expiresIn: "24h",
+    });
+
     const newUser = new UserDto(user);
     return res.status(201).json({ user: newUser, accessToken: accessToken });
   },

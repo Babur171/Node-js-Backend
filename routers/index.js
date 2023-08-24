@@ -12,9 +12,11 @@ router.get("/", (req, res) => {
 });
 router.post("/register", UserController.register);
 router.post("/login", UserController.login);
+router.get("/post", auth, PostController.getPosts);
 router.post("/post", auth, PostController.addPosts);
 router.get("/post/:id", auth, PostController.postById);
 router.delete("/post/:id", auth, PostController.postDelete);
+router.patch("/post/:id", auth, PostController.updatePosts);
 
 // router.get("/refresh", controler.refreshTokens);
 // router.post("/blog", auth, postControler.create);
