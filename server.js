@@ -19,7 +19,7 @@ app.use(router);
 
 dataBase();
 
-// app.use("/storage", express.static("storage"));
+app.use("/storage", express.static("storage"));
 app.use(errorHandler);
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
