@@ -19,6 +19,7 @@ router.delete("/post/:id", auth, PostController.postDelete);
 router.patch("/post/:id", auth, PostController.updatePosts);
 router.post("/comment", auth, PostController.commentPost);
 router.get("/comment", auth, PostController.commentList);
+router.post("/like_post", auth, PostController.postLike);
 
 // router.get("/refresh", controler.refreshTokens);
 // router.post("/blog", auth, postControler.create);

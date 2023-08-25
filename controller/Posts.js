@@ -6,6 +6,7 @@ const Comment = require("../modal/Comment");
 var myregexp = /^[0-9a-fA-F]{24}$/;
 const fs = require("fs");
 const { BACKEND_URL_PATH } = require("../config/index");
+const Likes = require("../modal/Likes");
 
 const PostController = {
   async addPosts(req, res, next) {
@@ -44,22 +45,26 @@ const PostController = {
     } catch (err) {
       return next(err);
     }
-    console.log("newPostData", newPostData);
     const newPost = new PostDto(newPostData);
     return res.status(201).json({ post: newPost });
   },
   async getPosts(req, res, next) {
     let newPostData;
     try {
-      newPostData = await Post.find({ author: req.user._id }).populate(
-        "comments"
-      );
+      newPostData = await Post.find({ author: req.user._id });
+      let allPosts = [];
+      let i;
+      for (let i = 0; i < newPostData.length; i++) {
+        const blog = await Post.findById(newPostData[i]._id).populate("author");
+        if (blog) {
+          const dto = new PostDto(blog);
+          allPosts.push(dto);
+        }
+      }
+      return res.status(200).json({ posts: allPosts });
     } catch (err) {
       return next(err);
     }
-    console.log("newPostData", newPostData);
-    // const newPost = new PostDto(newPostData);
-    return res.status(200).json({ posts: newPostData });
   },
   async postById(req, res, next) {
     var validateData = Joi.object({
@@ -72,7 +77,9 @@ const PostController = {
     const id = req.params.id;
     let newPostData;
     try {
-      newPostData = await Post.findById({ _id: id }).populate("author");
+      newPostData = await Post.findById({ _id: id })
+        .populate("author")
+        .populate("comments");
       if (!newPostData) {
         let error = {
           status: 400,
@@ -202,34 +209,29 @@ const PostController = {
     }
     const { content, author, post } = req.body;
 
-    let newPostId;
-    try {
-      newPostId = await Post.findOne({ _id: post });
-      if (!newPostId) {
-        let error = {
-          status: 400,
-          message: "not found post",
-        };
-        return next(error);
-      }
-    } catch (err) {
-      return next(err);
-    }
     let newPostData;
     try {
       newPostData = new Comment({
         content,
         author,
-        post,
       });
       await newPostData.save();
     } catch (err) {
       return next(err);
     }
-    console.log("newPostData", newPostData);
+    let newPostId;
+
+    try {
+      newPostId = await Post.findOne({ _id: post });
+      newPostId.comments.push(newPostData);
+      await newPostId.save();
+    } catch (err) {
+      return next(err);
+    }
     // const newPost = new PostDto(newPostData);
     return res.status(201).json({ post: newPostData });
   },
+
   async commentList(req, res, next) {
     var validateData = Joi.object({
       post: Joi.string().regex(myregexp).required(),
@@ -247,6 +249,41 @@ const PostController = {
     }
     // const newPost = new PostDtoById(newPostData);
     return res.status(200).json({ comments: commentsList });
+  },
+
+  async postLike(req, res, next) {
+    var validateData = Joi.object({
+      isLike: Joi.boolean().required(),
+      author: Joi.string().regex(myregexp).required(),
+      post: Joi.string().regex(myregexp).required(),
+    });
+    const { error } = validateData.validate(req.body);
+    if (error) {
+      next(error);
+    }
+    const { isLike, author, post } = req.body;
+
+    let newPostLike;
+    try {
+      newPostLike = new Likes({
+        isLike,
+        author,
+      });
+      await newPostLike.save();
+    } catch (err) {
+      return next(err);
+    }
+    let newPostId;
+
+    try {
+      newPostId = await Post.findOne({ _id: post });
+      newPostId.likes.push(newPostLike);
+      await newPostId.save();
+    } catch (err) {
+      return next(err);
+    }
+    // const newPost = new PostDto(newPostData);
+    return res.status(201).json({ post: newPostLike });
   },
 };
 module.exports = PostController;

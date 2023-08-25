@@ -7,6 +7,7 @@ class PostDtoById {
       username: post.author.username,
       id: post.author._id,
     };
+    this.comments = post.comments;
   }
 }
 
