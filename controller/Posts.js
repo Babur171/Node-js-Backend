@@ -112,6 +112,9 @@ const PostController = {
         };
         return next(error);
       }
+      await Comment.deleteMany({ post: id });
+      await Likes.deleteMany({ post: id });
+
       console.log("newPostDatanewPostData", newPostData);
     } catch (err) {
       return next(err);
@@ -214,6 +217,7 @@ const PostController = {
       newPostData = new Comment({
         content,
         author,
+        post,
       });
       await newPostData.save();
     } catch (err) {
@@ -268,6 +272,7 @@ const PostController = {
       newPostLike = new Likes({
         isLike,
         author,
+        post,
       });
       await newPostLike.save();
     } catch (err) {

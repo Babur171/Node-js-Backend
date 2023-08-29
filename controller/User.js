@@ -91,5 +91,22 @@ const UserController = {
     const newUser = new UserDto(user);
     return res.status(201).json({ user: newUser, accessToken: accessToken });
   },
+  async googleLogin(req, res, next) {
+    if (req.isAuthenticated()) {
+      const { emails, id, displayName } = req.user;
+      let user = {
+        _id: id,
+        email: emails[0]?.value,
+        username: displayName,
+      };
+
+      let accessToken = jwt.sign({ id }, SECRETTOKEN, {
+        expiresIn: "24h",
+      });
+
+      const newUser = new UserDto(user);
+      return res.status(201).json({ user: newUser, accessToken: accessToken });
+    }
+  },
 };
 module.exports = UserController;
