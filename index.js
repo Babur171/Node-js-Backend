@@ -4,10 +4,12 @@ const dataBase = require("./database/index");
 const router = require("./routers/index");
 const errorHandler = require("./errorHandler/index");
 const passport = require("./social/passport");
+const { PORT } = require("./config/index");
 // const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
+const port = PORT || 3000;
 
 //dsadsad
 
@@ -36,4 +38,6 @@ dataBase();
 app.use("/storage", express.static("storage"));
 app.use(errorHandler);
 
-module.exports = app;
+app.listen(port, () => {
+  console.log("this app is running on " + port);
+});
