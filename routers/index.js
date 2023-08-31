@@ -10,7 +10,7 @@ const auth = require("../middleware/auth");
 
 router.get("*", (req, res, next) => {
   res.status(200).json({
-    message: "bad request",
+    message: "deployed",
   });
 });
 
