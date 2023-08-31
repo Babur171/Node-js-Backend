@@ -1,13 +1,17 @@
 const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
-const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } = require("../config/index");
+const {
+  GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET,
+  BACKEND_URL_PATH,
+} = require("../config/index");
 
 passport.use(
   new GoogleStrategy(
     {
       clientID: `${GOOGLE_CLIENT_ID}`,
       clientSecret: `${GOOGLE_CLIENT_SECRET}`,
-      callbackURL: "http://localhost:3001/auth/google/callback", // Update the callback URL
+      callbackURL: `${BACKEND_URL_PATH}auth/google/callback`, // Update the callback URL
     },
     (accessToken, refreshToken, profile, done) => {
       // Callback function when user is authenticated
