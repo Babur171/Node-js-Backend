@@ -17,17 +17,6 @@ const port = PORT || 3000;
 app.use(cors());
 app.use(morgan("tiny"));
 
-// Initialize Passport
-app.use(passport.initialize());
-app.use(passport.session());
-app.use(bodyParser.json()); // for parsing application/json
-app.use(bodyParser.urlencoded({ extended: true }));
-// app.use(cookieParser());
-app.use(express.json());
-
-app.use(router);
-
-dataBase();
 app.use(
   session({
     cookie: {
@@ -47,6 +36,17 @@ app.use(function (req, res, next) {
   }
   next(); //otherwise continue
 });
+// Initialize Passport
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(bodyParser.json()); // for parsing application/json
+app.use(bodyParser.urlencoded({ extended: true }));
+// app.use(cookieParser());
+app.use(express.json());
+
+app.use(router);
+
+dataBase();
 
 app.use("/storage", express.static("storage"));
 app.use(errorHandler);
