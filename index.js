@@ -12,15 +12,6 @@ const bodyParser = require("body-parser");
 const morgan = require("morgan");
 const port = PORT || 3000;
 
-const MongoStore = require("connect-mongo")(session);
-
-app.use(
-  session({
-    secret: "foo",
-    store: new MongoStore(options),
-  })
-);
-
 //dsadsad
 
 app.use(cors());
@@ -56,6 +47,14 @@ app.use(express.json());
 app.use(router);
 
 dataBase();
+const MongoStore = require("connect-mongo")(session);
+
+app.use(
+  session({
+    secret: "foo",
+    store: new MongoStore(options),
+  })
+);
 
 app.use("/storage", express.static("storage"));
 app.use(errorHandler);
