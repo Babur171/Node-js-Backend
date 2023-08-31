@@ -12,30 +12,39 @@ const bodyParser = require("body-parser");
 const morgan = require("morgan");
 const port = PORT || 3000;
 
+const MongoStore = require("connect-mongo")(session);
+
+app.use(
+  session({
+    secret: "foo",
+    store: new MongoStore(options),
+  })
+);
+
 //dsadsad
 
 app.use(cors());
 app.use(morgan("tiny"));
 
-app.use(
-  session({
-    cookie: {
-      secure: true,
-      maxAge: 60000,
-    },
-    store: new RedisStore(),
-    secret: "SDSDASDASDSAKDLKJLASLKDJLASDJLASJD",
-    saveUninitialized: true,
-    resave: false,
-  })
-);
+// app.use(
+//   session({
+//     cookie: {
+//       secure: true,
+//       maxAge: 60000,
+//     },
+//     store: new RedisStore(),
+//     secret: "SDSDASDASDSAKDLKJLASLKDJLASDJLASJD",
+//     saveUninitialized: true,
+//     resave: false,
+//   })
+// );
 
-app.use(function (req, res, next) {
-  if (!req.session) {
-    return next(new Error("Oh no")); //handle error
-  }
-  next(); //otherwise continue
-});
+// app.use(function (req, res, next) {
+//   if (!req.session) {
+//     return next(new Error("Oh no")); //handle error
+//   }
+//   next(); //otherwise continue
+// });
 // Initialize Passport
 app.use(passport.initialize());
 app.use(passport.session());
