@@ -17,7 +17,7 @@ app.use(cors());
 app.use(morgan("tiny"));
 app.use(
   require("express-session")({
-    secret: "SDSDASDASDSAKDLKJASLKDJLASDJLASJDL",
+    secret: "SDSDASDASDSAKDLKJLASLKDJLASDJLASJDL",
     resave: true,
     saveUninitialized: true,
   })
