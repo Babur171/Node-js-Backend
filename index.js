@@ -5,6 +5,7 @@ const router = require("./routers/index");
 const errorHandler = require("./errorHandler/index");
 const passport = require("./social/passport");
 const { PORT } = require("./config/index");
+const session = require("express-session");
 // const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const bodyParser = require("body-parser");
@@ -15,13 +16,6 @@ const port = PORT || 3000;
 
 app.use(cors());
 app.use(morgan("tiny"));
-app.use(
-  require("express-session")({
-    secret: "SDSDASDASDSAKDLKJLASLKDJLASDJLASJDL",
-    resave: true,
-    saveUninitialized: true,
-  })
-);
 
 // Initialize Passport
 app.use(passport.initialize());
@@ -34,6 +28,25 @@ app.use(express.json());
 app.use(router);
 
 dataBase();
+app.use(
+  session({
+    cookie: {
+      secure: true,
+      maxAge: 60000,
+    },
+    store: new RedisStore(),
+    secret: "SDSDASDASDSAKDLKJLASLKDJLASDJLASJD",
+    saveUninitialized: true,
+    resave: false,
+  })
+);
+
+app.use(function (req, res, next) {
+  if (!req.session) {
+    return next(new Error("Oh no")); //handle error
+  }
+  next(); //otherwise continue
+});
 
 app.use("/storage", express.static("storage"));
 app.use(errorHandler);
