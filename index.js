@@ -38,10 +38,6 @@ dataBase();
 app.use("/storage", express.static("storage"));
 app.use(errorHandler);
 
-app.get("/", (req, res) => {
-  res.send("Hey this is my API running 🥳");
-});
-
 app.listen(port, () => {
   console.log("this app is running on " + port);
 });
