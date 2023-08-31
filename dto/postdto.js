@@ -4,7 +4,12 @@ class PostDto {
       (this.content = post.content),
       (this.title = post.title);
     this.image = post.image;
-    this.author = post.author;
+    this.author = {
+      username: post.author.username,
+      id: post.author._id,
+    };
+    this.comments = post?.comments?.length;
+    this.likes = post?.likes?.length;
   }
 }
 
