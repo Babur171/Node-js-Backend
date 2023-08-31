@@ -8,9 +8,12 @@ const passport = require("passport");
 const auth = require("../middleware/auth");
 // const commentController = require("../controler/commentController");
 
-router.get("/", (req, res) => {
-  res.json({ work: "workinggg" });
+router.get("*", (req, res, next) => {
+  res.status(200).json({
+    message: "bad request",
+  });
 });
+
 router.post("/register", UserController.register);
 router.post("/login", UserController.login);
 router.get("/post", auth, PostController.getPosts);
