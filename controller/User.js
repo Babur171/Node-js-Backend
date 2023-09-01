@@ -20,17 +20,14 @@ const UserController = {
     const { username, email, password, gender } = req.body;
     try {
       const emailExist = await User.exists({ email: email });
-      console.log("emailExistemailExist", emailExist);
       if (emailExist) {
         const error = {
           status: 209,
           message: "Email allready exist",
         };
-        console.log("errorerror", error);
         return next(error);
       }
     } catch (err) {
-      console.log("hasPasswordhasPassword", err);
       return next(err);
     }
 
@@ -46,7 +43,6 @@ const UserController = {
       });
       await user.save();
     } catch (error) {
-      console.log("catch");
       return next(error);
     }
     return res.status(201).json({ user: user });
@@ -81,7 +77,6 @@ const UserController = {
         return next(error);
       }
     } catch (error) {
-      console.log("catch");
       return next(error);
     }
     let accessToken = jwt.sign({ id: user._id }, SECRETTOKEN, {

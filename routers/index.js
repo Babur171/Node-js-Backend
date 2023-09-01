@@ -2,13 +2,16 @@ const express = require("express");
 const router = express.Router();
 const UserController = require("../controller/User");
 const PostController = require("../controller/Posts");
+const TaskController = require("../controller/Tasks");
+
 // const postControler = require("../controler/postControler");
 const passport = require("passport");
 // const bodyParser = require("body-parser");
 const auth = require("../middleware/auth");
+const LocationController = require("../controller/Location");
 // const commentController = require("../controler/commentController");
 
-router.get("*", (req, res, next) => {
+router.get("/", (req, res, next) => {
   res.status(200).json({
     message: "deployed",
   });
@@ -37,6 +40,11 @@ router.get(
   }
 );
 router.get("/user", UserController.googleLogin);
+router.post("/task", auth, TaskController.addTask);
+router.get("/task", auth, TaskController.getTask);
+router.patch("/task/:id", auth, TaskController.updateTask);
+router.post("/check-in", auth, LocationController.checkIn);
+router.get("/check-in", auth, LocationController.getCheckIn);
 
 // router.get("/refresh", controler.refreshTokens);
 // router.post("/blog", auth, postControler.create);
