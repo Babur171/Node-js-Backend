@@ -57,7 +57,7 @@ const LocationsController = {
           .status(201)
           .json({ task: { userCurrentLocation, newTaskData } });
       } else {
-        return res.status(201).json({ task: "addedd" });
+        return res.status(201).json({ location: "New location added" });
       }
     } catch (err) {
       return next(err);
