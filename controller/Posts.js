@@ -34,7 +34,6 @@ const PostController = {
 
     let newPostData;
     try {
-      console.log("BACKEND_URL_PATHBACKEND_URL_PATH", BACKEND_URL_PATH);
       newPostData = new Post({
         title,
         content,
@@ -114,8 +113,6 @@ const PostController = {
       }
       await Comment.deleteMany({ post: id });
       await Likes.deleteMany({ post: id });
-
-      console.log("newPostDatanewPostData", newPostData);
     } catch (err) {
       return next(err);
     }
@@ -154,7 +151,6 @@ const PostController = {
 
     if (image) {
       let prveiousImage = newPostId.image;
-      console.log("prveiousImageprveiousImage", prveiousImage);
       prveiousImage = prveiousImage.split("/").at(-1);
       fs.unlinkSync(`storage/${prveiousImage}`);
 
