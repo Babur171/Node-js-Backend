@@ -81,5 +81,21 @@ const TasksController = {
     // const newPost = new PostDto(newPostData);
     return res.status(200).json({ task: newTaskData });
   },
+  async deleteTask(req, res, next) { 
+   const id = req.params.id;
+    let newTaskData;
+    try {
+      newTaskData = await Task.findByIdAndDelete(
+        { _id: id },
+        {
+          new: true,
+        }
+      );
+    } catch (err) {
+      return next(err);
+    }
+    // const newPost = new PostDto(newPostData);
+    return res.status(200).json({ task: newTaskData });
+  },
 };
 module.exports = TasksController;
