@@ -45,14 +45,9 @@ router.get("/task", auth, TaskController.getTask);
 router.patch("/task/:id", auth, TaskController.updateTask);
 router.post("/check-in", auth, LocationController.checkIn);
 router.get("/check-in", auth, LocationController.getCheckIn);
-
-// router.get("/refresh", controler.refreshTokens);
-// router.post("/blog", auth, postControler.create);
-// router.get("/blog", auth, postControler.getAll);
-// router.get("/blog/:id", auth, postControler.getById);
-// router.put("/blog", auth, postControler.update);
-// router.delete("/blog/:id", auth, postControler.delete);
-// router.post("/comment", auth, commentController.create);
-// router.get("/comment/:id", auth, commentController.getById);
+router.post("/device", auth, TaskController.addDevice);
+router.post("/notification", auth, TaskController.addNotification);
+router.get("/notification", auth, TaskController.getNotification);
+router.patch("/notification/:id", auth, TaskController.updateNotification);
 
 module.exports = router;
