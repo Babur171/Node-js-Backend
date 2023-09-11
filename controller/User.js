@@ -60,7 +60,7 @@ const UserController = {
 
     let user;
     try {
-      user = await User.findOne({ email });
+      user = await User.findOne({ email:email });
       if (!user) {
         let error = {
           status: 401,

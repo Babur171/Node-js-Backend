@@ -43,6 +43,7 @@ router.get("/user", UserController.googleLogin);
 router.post("/task", auth, TaskController.addTask);
 router.get("/task", auth, TaskController.getTask);
 router.patch("/task/:id", auth, TaskController.updateTask);
+router.delete("/task/:id", auth, TaskController.deleteTask);
 router.post("/check-in", auth, LocationController.checkIn);
 router.get("/check-in", auth, LocationController.getCheckIn);
 router.post("/device", auth, TaskController.addDevice);
