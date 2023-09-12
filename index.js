@@ -3,7 +3,7 @@ const app = express();
 const dataBase = require("./database/index");
 const router = require("./routers/index");
 const errorHandler = require("./errorHandler/index");
-const passport = require("./social/passport");
+// const passport = require("./social/passport");
 const { PORT } = require("./config/index");
 // const cookieParser = require("cookie-parser");
 const cors = require("cors");
@@ -24,8 +24,9 @@ app.use(
 );
 
 // Initialize Passport
-app.use(passport.initialize());
-app.use(passport.session());
+// app.use(passport.initialize());
+// app.use(passport.session());
+
 app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true }));
 // app.use(cookieParser());

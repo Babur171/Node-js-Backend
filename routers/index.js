@@ -27,18 +27,7 @@ router.patch("/post/:id", auth, PostController.updatePosts);
 router.post("/comment", auth, PostController.commentPost);
 router.get("/comment", auth, PostController.commentList);
 router.post("/like_post", auth, PostController.postLike);
-router.get(
-  "/auth/google",
-  passport.authenticate("google", { scope: ["profile", "email"] })
-);
 
-router.get(
-  "/auth/google/callback",
-  passport.authenticate("google", { failureRedirect: "/" }),
-  (req, res) => {
-    res.redirect("/user");
-  }
-);
 router.get("/user", UserController.googleLogin);
 router.post("/task", auth, TaskController.addTask);
 router.get("/task", auth, TaskController.getTask);
@@ -50,5 +39,7 @@ router.post("/device", auth, TaskController.addDevice);
 router.post("/notification", auth, TaskController.addNotification);
 router.get("/notification", auth, TaskController.getNotification);
 router.patch("/notification/:id", auth, TaskController.updateNotification);
+router.get("/noti", auth, TaskController.paginate);
+router.post("/auth/google", UserController.googleLoginApi);
 
 module.exports = router;
