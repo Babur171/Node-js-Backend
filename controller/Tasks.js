@@ -2,15 +2,10 @@ const Joi = require("joi");
 const Task = require("../modal/Task");
 const TaskDto = require("../dto/taskDTo");
 var myregexp = /^[0-9a-fA-F]{24}$/;
-var admin = require("firebase-admin");
 const DeviceModal = require("../modal/Devices");
 const Notification = require("../modal/Notifications");
 
-var serviceAccount = require("../firebase/serviceAccountKey.json");
-
-const firebaseAsmin = admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-});
+var firebaseAdmin = require("../firebase/index");
 
 const TasksController = {
   async addTask(req, res, next) {
@@ -132,7 +127,7 @@ const TasksController = {
     }
     const { device_token } = req.body;
     try {
-      firebaseAsmin.messaging().send({
+      firebaseAdmin.messaging().send({
         token: device_token,
         notification: {
           title: "Add task",
@@ -182,6 +177,44 @@ const TasksController = {
       return res.status(201).json({ notification: notifications });
     } catch (err) {
       return next(err);
+    }
+  },
+  async paginate(req, res, next) {
+    const page = parseInt(req.query.page);
+    const limit = parseInt(req.query.limit);
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+
+    const result = {};
+    try {
+      if (endIndex < (await Notification.countDocuments().exec())) {
+        result.next = {
+          nextPage: page + 1,
+          limit: limit,
+        };
+      } else {
+        result.next = {
+          nextPage: null,
+          limit: limit,
+        };
+      }
+      if (startIndex > 0) {
+        result.previous = {
+          previousPage: page - 1,
+          limit: limit,
+        };
+      }
+    } catch (err) {
+      return next(err);
+    }
+
+    try {
+      const total = await Notification.countDocuments().exec();
+      result.results = await Notification.find().limit(limit).skip(startIndex);
+      res.paginatedResult = result;
+      return res.status(200).json({ notifications: result, total: total });
+    } catch (e) {
+      res.status(500).json({ message: e.message });
     }
   },
 };

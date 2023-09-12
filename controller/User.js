@@ -4,6 +4,7 @@ const bcrypt = require("bcryptjs");
 const UserDto = require("../dto/user");
 const jwt = require("jsonwebtoken");
 const { SECRETTOKEN } = require("../config/index");
+const axios = require("axios");
 
 const UserController = {
   async register(req, res, next) {
@@ -101,6 +102,24 @@ const UserController = {
 
       const newUser = new UserDto(user);
       return res.status(201).json({ user: newUser, accessToken: accessToken });
+    }
+  },
+  async googleLoginApi(req, res, next) {
+    const { token } = req.body;
+    try {
+      const ticket = await axios({
+        method: "GET",
+        url:
+          "https://www.googleapis.com/oauth2/v3/userinfo?access_token=" + token,
+        headers: {
+          "content-type": "application/x-www-form-urlencoded",
+          "x-rapidapi-host": "astrology-horoscope.p.rapidapi.com",
+          "x-rapidapi-key": "yourapikey",
+        },
+      });
+      return res.status(200).json({ user: ticket.data });
+    } catch (error) {
+      return next(error); // Token is invalid
     }
   },
 };
