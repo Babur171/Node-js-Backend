@@ -1,7 +1,7 @@
 const User = require("../modal/User");
 const asyncHandler = require("express-async-handler");
 const jwt = require("jsonwebtoken");
-const { SECRETTOKEN } = require("../config/index");
+const { SECRETTOKEN } = require("../config/constants");
 
 const auth = asyncHandler(async (req, res, next) => {
   let token;

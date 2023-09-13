@@ -5,7 +5,7 @@ const PostDtoById = require("../dto/postdtoById");
 const Comment = require("../modal/Comment");
 var myregexp = /^[0-9a-fA-F]{24}$/;
 const fs = require("fs");
-const { BACKEND_URL_PATH } = require("../config/index");
+const { BACKEND_URL_PATH } = require("../config/constants");
 const Likes = require("../modal/Likes");
 
 const PostController = {
