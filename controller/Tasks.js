@@ -178,8 +178,9 @@ const TasksController = {
     } catch (err) {
       return next(err);
     }
-  async deleteTask(req, res, next) { 
-   const id = req.params.id;
+  },
+  async deleteTask(req, res, next) {
+    const id = req.params.id;
     let newTaskData;
     try {
       newTaskData = await Task.findByIdAndDelete(
