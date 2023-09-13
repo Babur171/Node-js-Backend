@@ -5,7 +5,7 @@ const {
   PRIVATE_KEY,
   PRIVATE_KEY_ID,
   PROJECT_ID,
-} = require("../config/index");
+} = require("../config/constants");
 
 const firebaseFile = {
   type: "service_account",
