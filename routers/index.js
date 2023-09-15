@@ -19,6 +19,10 @@ router.get("/", (req, res, next) => {
 
 router.post("/register", UserController.register);
 router.post("/login", UserController.login);
+router.post("/send-token", UserController.sendResetEmail);
+router.post("/verify-token", UserController.verifyToken);
+router.post("/reset-password", UserController.resetPassword);
+
 router.get("/post", auth, PostController.getPosts);
 router.post("/post", auth, PostController.addPosts);
 router.get("/post/:id", auth, PostController.postById);
