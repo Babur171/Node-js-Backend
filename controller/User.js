@@ -189,5 +189,6 @@ const UserController = {
       return next(error);
     }
   },
+  
 };
 module.exports = UserController;

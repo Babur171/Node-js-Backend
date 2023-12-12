@@ -26,6 +26,9 @@ router.post("/reset-password", UserController.sendResetEmail);
 router.post("/patient",  PatientsController.addPatient);
 router.get("/patient",  PatientsController.getPatients);
 
+router.post("/send-token", UserController.sendResetEmail);
+router.post("/verify-token", UserController.verifyToken);
+
 router.get("/post", auth, PostController.getPosts);
 router.post("/post", auth, PostController.addPosts);
 router.get("/post/:id", auth, PostController.postById);
