@@ -13,6 +13,8 @@ const PRIVATE_KEY_ID = process.env.PRIVATE_KEY_ID;
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const CLIENT_EMAIL = process.env.CLIENT_EMAIL;
 const CLIENT_ID = process.env.CLIENT_ID;
+const SENDGRID_KEY = process.env.SENDGRID_KEY;
+const SENDER_EMAIL_ADDRESS = process.env.SENDER_EMAIL;
 
 module.exports = {
   PORT,
@@ -28,4 +30,6 @@ module.exports = {
   PRIVATE_KEY,
   PRIVATE_KEY_ID,
   PROJECT_ID,
+  SENDGRID_KEY,
+  SENDER_EMAIL_ADDRESS,
 };
