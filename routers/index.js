@@ -21,13 +21,10 @@ router.get("/", (req, res, next) => {
 
 router.post("/register", UserController.register);
 router.post("/login", UserController.login);
-// router.post("/reset-password", UserController.sendResetEmail);
+router.post("/reset-password", UserController.sendResetEmail);
 
 router.post("/patient",  PatientsController.addPatient);
 router.get("/patient",  PatientsController.getPatients);
-
-// router.post("/send-token", UserController.sendResetEmail);
-router.post("/verify-token", UserController.verifyToken);
 
 router.get("/post", auth, PostController.getPosts);
 router.post("/post", auth, PostController.addPosts);
