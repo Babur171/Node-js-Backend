@@ -2,16 +2,16 @@ const User = require("../modal/User");
 const Joi = require("joi");
 const bcrypt = require("bcryptjs");
 const UserDto = require("../dto/user");
-// const jwt = require("jsonwebtoken");/
-// const { SENDGRID_KEY, SENDER_EMAIL_ADDRESS } = require("../config/constants");
+const jwt = require("jsonwebtoken");
+const { SENDGRID_KEY, SENDER_EMAIL_ADDRESS } = require("../config/constants");
 const generateToken = require("../config/generateToken");
 const axios = require("axios");
-// const sgMail = require("@sendgrid/mail");
-// const Token = require("../modal/Token");
-// const crypto = require("crypto");
+const sgMail = require("@sendgrid/mail");
+const Token = require("../modal/Token.js");
+const crypto = require("crypto");
 
-// const SENDGRID_API_KEY = SENDGRID_KEY;
-// const SENDER_EMAIL = SENDER_EMAIL_ADDRESS;
+const SENDGRID_API_KEY = SENDGRID_KEY;
+const SENDER_EMAIL = SENDER_EMAIL_ADDRESS;
 
 const UserController = {
   async register(req, res, next) {
@@ -132,63 +132,63 @@ const UserController = {
       return next(error); // Token is invalid
     }
   },
-  // async sendResetEmail(req, res, next) {
-  //   sgMail.setApiKey(SENDGRID_API_KEY);
+  async sendResetEmail(req, res, next) {
+    sgMail.setApiKey(SENDGRID_API_KEY);
 
-  //   var validateEmail = Joi.object({
-  //     email: Joi.string().required(),
-  //   });
-  //   const { error } = validateEmail.validate(req.body);
-  //   if (error) {
-  //     next(error);
-  //   }
-  //   const { email } = req.body;
-  //   let resetToken;
-  //   try {
-  //     const user = await User.findOne({ email });
-  //     if (!user) {
-  //       let data = {
-  //         message: "User does not exist",
-  //         status: 404,
-  //       };
-  //       return next(data);
-  //     }
+    var validateEmail = Joi.object({
+      email: Joi.string().required(),
+    });
+    const { error } = validateEmail.validate(req.body);
+    if (error) {
+      next(error);
+    }
+    const { email } = req.body;
+    let resetToken;
+    try {
+      const user = await User.findOne({ email });
+      if (!user) {
+        let data = {
+          message: "User does not exist",
+          status: 404,
+        };
+        return next(data);
+      }
 
-  //     let token = await Token.findOne({ userId: user._id });
-  //     if (token) {
-  //       await token.deleteOne();
-  //     }
+      let token = await Token.findOne({ userId: user._id });
+      if (token) {
+        await token.deleteOne();
+      }
 
-  //     resetToken = crypto.randomBytes(3).toString("hex");
-  //     // const hash = await bcrypt.hash(resetToken, 10);
-  //     const tokenData = await new Token({
-  //       userId: user._id,
-  //       token: resetToken.toUpperCase(),
-  //       createdAt: Date.now(),
-  //     });
+      resetToken = crypto.randomBytes(3).toString("hex");
+      // const hash = await bcrypt.hash(resetToken, 10);
+      const tokenData = await new Token({
+        userId: user._id,
+        token: resetToken.toUpperCase(),
+        createdAt: Date.now(),
+      });
 
-  //     tokenData.save();
-  //   } catch (err) {
-  //     return next(error);
-  //   }
-  //   const msg = {
-  //     to: email,
-  //     from: {
-  //       name: "Reset code",
-  //       email: SENDER_EMAIL,
-  //     },
-  //     subject: "Password Reset",
-  //     html: `
-  //     <p>Reset your password code:<strong style="text-transform: uppercase">${resetToken}</strong></p>`,
-  //   };
+      tokenData.save();
+    } catch (err) {
+      return next(error);
+    }
+    const msg = {
+      to: email,
+      from: {
+        name: "Reset code",
+        email: SENDER_EMAIL,
+      },
+      subject: "Password Reset",
+      html: `
+      <p>Reset your password code:<strong style="text-transform: uppercase">${resetToken}</strong></p>`,
+    };
 
-  //   try {
-  //     await sgMail.send(msg);
-  //     return res.status(200).json({ sent: "Reset email sent" });
-  //   } catch (error) {
-  //     return next(error);
-  //   }
-  // },
-  
+    try {
+      await sgMail.send(msg);
+      return res.status(200).json({ sent: "Reset email sent" });
+    } catch (error) {
+      return next(error);
+    }
+  },
+
 };
 module.exports = UserController;
