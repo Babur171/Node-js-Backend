@@ -23,8 +23,8 @@ router.post("/register", UserController.register);
 router.post("/login", UserController.login);
 router.post("/reset-password", UserController.sendResetEmail);
 
-router.post("/patient",  PatientsController.addPatient);
-router.get("/patient",  PatientsController.getPatients);
+router.post("/patient",auth, PatientsController.addPatient);
+router.get("/patient",auth,  PatientsController.getPatients);
 
 router.get("/post", auth, PostController.getPosts);
 router.post("/post", auth, PostController.addPosts);
