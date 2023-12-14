@@ -37,10 +37,10 @@ app.use(router);
 
 connectDB();
 
-app.use('/images', express.static(path.join(__dirname, 'tmp', 'images')));
+app.use('/images', express.static(path.join(__dirname, 'storage', 'images')));
 
-// Serve PDFs from the "tmp/pdfs/" directory
-app.use('/pdfs', express.static(path.join(__dirname, 'tmp', 'pdfs')));
+// Serve PDFs from the "storage/pdfs/" directory
+app.use('/pdfs', express.static(path.join(__dirname, 'storage', 'pdfs')));
 app.use(errorHandler);
 
 app.listen(port, () => {
