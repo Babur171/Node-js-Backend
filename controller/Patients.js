@@ -102,8 +102,8 @@ const PatientsController = {
 
           try {
             // Ensure the folder exists
-            if (!fs.existsSync(path.join("tmp", pdfFolder))) {
-              fs.mkdirSync(path.join("tmp", pdfFolder), {
+            if (!fs.existsSync(path.join("/tmp", pdfFolder))) {
+              fs.mkdirSync(path.join("/tmp", pdfFolder), {
                 recursive: true,
               });
             }
