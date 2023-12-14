@@ -25,6 +25,8 @@ router.post("/reset-password", UserController.sendResetEmail);
 
 router.post("/patient",auth, PatientsController.addPatient);
 router.get("/patient",auth,  PatientsController.getPatients);
+router.patch("/patient/:patientId",auth,  PatientsController.updatePatient);
+
 
 router.get("/post", auth, PostController.getPosts);
 router.post("/post", auth, PostController.addPosts);

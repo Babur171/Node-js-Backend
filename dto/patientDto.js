@@ -4,6 +4,7 @@ class PatientDto {
       (this.patient_name = patient.patient_name),
       (this.admit_date = patient.admit_date);
     this.image = patient.image;
+    this.pdffile=patient.pdffile;
     this.user = {
       username: patient?.user?.username,
       id: patient?.user?._id,
