@@ -78,7 +78,7 @@ const PatientsController = {
               fs.mkdirSync(`tmp/${imageFolder}`);
             }
 
-            fs.writeFileSync(`tmp/${imagePath}`, imageFile.buffer);
+            fs.writeFileSync(`/tmp/${imagePath}`, imageFile.buffer);
           } catch (error) {
             deleteFile(imageFile.path);
             return next(error);
@@ -97,7 +97,7 @@ const PatientsController = {
           const pdfFileName = `pdf-${Date.now()}.pdf`;
 
           pdfFilePath = path
-            .join("tmp", pdfFolder, pdfFileName)
+            .join("/tmp", pdfFolder, pdfFileName)
             .replace(/\\/g, "/");
 
           try {
