@@ -97,13 +97,13 @@ const PatientsController = {
           const pdfFileName = `pdf-${Date.now()}.pdf`;
 
           pdfFilePath = path
-            .join("storage", pdfFolder, pdfFileName)
+            .join("/tmp", pdfFolder, pdfFileName)
             .replace(/\\/g, "/");
 
           try {
             // Ensure the folder exists
-            if (!fs.existsSync(path.join("storage", pdfFolder))) {
-              fs.mkdirSync(path.join("storage", pdfFolder), {
+            if (!fs.existsSync(path.join("/tmp", pdfFolder))) {
+              fs.mkdirSync(path.join("/tmp", pdfFolder), {
                 recursive: true,
               });
             }
