@@ -97,7 +97,7 @@ const PatientsController = {
           const pdfFileName = `pdf-${Date.now()}.pdf`;
 
           pdfFilePath = path
-            .join("/tmp", pdfFolder, pdfFileName)
+            .join("tmp", pdfFolder, pdfFileName)
             .replace(/\\/g, "/");
 
           try {
