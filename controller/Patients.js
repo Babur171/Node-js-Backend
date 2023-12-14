@@ -74,11 +74,11 @@ const PatientsController = {
 
           try {
             // Ensure the folder exists
-            if (!fs.existsSync(`storage/${imageFolder}`)) {
-              fs.mkdirSync(`storage/${imageFolder}`);
+            if (!fs.existsSync(`/tmp/${imageFolder}`)) {
+              fs.mkdirSync(`/tmp/${imageFolder}`);
             }
 
-            fs.writeFileSync(`storage/${imagePath}`, imageFile.buffer);
+            fs.writeFileSync(`/tmp/${imagePath}`, imageFile.buffer);
           } catch (error) {
             deleteFile(imageFile.path);
             return next(error);
