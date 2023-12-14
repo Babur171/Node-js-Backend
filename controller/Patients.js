@@ -74,11 +74,11 @@ const PatientsController = {
 
           try {
             // Ensure the folder exists
-            if (!fs.existsSync(`/tmp/${imageFolder}`)) {
-              fs.mkdirSync(`/tmp/${imageFolder}`);
+            if (!fs.existsSync(`tmp/${imageFolder}`)) {
+              fs.mkdirSync(`tmp/${imageFolder}`);
             }
 
-            fs.writeFileSync(`/tmp/${imagePath}`, imageFile.buffer);
+            fs.writeFileSync(`tmp/${imagePath}`, imageFile.buffer);
           } catch (error) {
             deleteFile(imageFile.path);
             return next(error);
@@ -97,13 +97,13 @@ const PatientsController = {
           const pdfFileName = `pdf-${Date.now()}.pdf`;
 
           pdfFilePath = path
-            .join("/tmp", pdfFolder, pdfFileName)
+            .join("tmp", pdfFolder, pdfFileName)
             .replace(/\\/g, "/");
 
           try {
             // Ensure the folder exists
-            if (!fs.existsSync(path.join("/tmp", pdfFolder))) {
-              fs.mkdirSync(path.join("/tmp", pdfFolder), {
+            if (!fs.existsSync(path.join("tmp", pdfFolder))) {
+              fs.mkdirSync(path.join("tmp", pdfFolder), {
                 recursive: true,
               });
             }
