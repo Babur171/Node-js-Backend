@@ -107,7 +107,7 @@ const PatientsController = {
               });
             }
 
-            fs.writeFileSync(`tmp/${pdfFilePath}`, pdfFile.buffer);
+            fs.writeFileSync(`/tmp/${pdfFilePath}`, pdfFile.buffer);
           } catch (error) {
             // Delete the file if an error occurs
             deleteFile(pdfFile.path);
