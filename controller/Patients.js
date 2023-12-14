@@ -95,9 +95,8 @@ const PatientsController = {
 
           const pdfFolder = "pdfs";
           const pdfFileName = `pdf-${Date.now()}.pdf`;
-
-          pdfFilePath = path
-            .join("tmp", pdfFolder, pdfFileName)
+          
+          pdfFilePath =pdfFolder+"/"+pdfFileName
             .replace(/\\/g, "/");
 
           try {
@@ -108,7 +107,7 @@ const PatientsController = {
               });
             }
 
-            fs.writeFileSync(pdfFilePath, pdfFile.buffer);
+            fs.writeFileSync(`tmp/${pdfFilePath}`, pdfFile.buffer);
           } catch (error) {
             // Delete the file if an error occurs
             deleteFile(pdfFile.path);
@@ -126,7 +125,7 @@ const PatientsController = {
             discharg_date: discharg_date ? discharg_date : null,
             user,
             image: imagePath ? `${BACKEND_URL_PATH}storage/${imagePath}` : null,
-            pdffile: pdfFilePath ? `${BACKEND_URL_PATH}${pdfFilePath}` : null,
+            pdffile: pdfFilePath ? `${BACKEND_URL_PATH}storage/${pdfFilePath}` : null,
           });
           await newPatientData.save();
         } catch (err) {
