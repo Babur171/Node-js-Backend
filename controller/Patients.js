@@ -94,15 +94,13 @@ const PatientsController = {
           }
 
           const pdfFolder = "pdfs";
-          const pdfFileName = `pdf-${Date.now()}.pdf`;
           
-          pdfFilePath =`${pdfFolder}/pdf-${Date.now()}` + `-pdf-${Date.now()}.pdf`;
+          pdfFilePath =`${pdfFolder}/pdf-${Date.now()}-patient.pdf`;
           try {
             // Ensure the folder exists
-            if (!fs.existsSync(path.join("/tmp/", pdfFolder))) {
-              fs.mkdirSync(path.join("/tmp/", pdfFolder), {
-                recursive: true,
-              });
+
+            if (!fs.existsSync(`/tmp/${pdfFolder}`)) {
+              fs.mkdirSync(`/tmp/${pdfFolder}`);
             }
 
             fs.writeFileSync(`/tmp/${pdfFilePath}`, pdfFile.buffer);
