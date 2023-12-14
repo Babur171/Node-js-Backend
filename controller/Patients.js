@@ -96,13 +96,11 @@ const PatientsController = {
           const pdfFolder = "pdfs";
           const pdfFileName = `pdf-${Date.now()}.pdf`;
           
-          pdfFilePath =pdfFolder+"/"+pdfFileName
-            .replace(/\\/g, "/");
-
+          pdfFilePath =`${pdfFolder}/pdf-${Date.now()}` + `-pdf-${Date.now()}.pdf`;
           try {
             // Ensure the folder exists
-            if (!fs.existsSync(path.join("/tmp", pdfFolder))) {
-              fs.mkdirSync(path.join("/tmp", pdfFolder), {
+            if (!fs.existsSync(path.join("/tmp/", pdfFolder))) {
+              fs.mkdirSync(path.join("/tmp/", pdfFolder), {
                 recursive: true,
               });
             }
