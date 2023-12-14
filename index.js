@@ -9,6 +9,7 @@ const { PORT } = require("./config/constants");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
+const path = require('path');
 const port = PORT || 3000;
 
 //dsadsad
@@ -36,7 +37,10 @@ app.use(router);
 
 connectDB();
 
-app.use("/storage", express.static("storage"));
+app.use('/images', express.static(path.join(__dirname, 'storage', 'images')));
+
+// Serve PDFs from the "storage/pdfs/" directory
+app.use('/pdfs', express.static(path.join(__dirname, 'storage', 'pdfs')));
 app.use(errorHandler);
 
 app.listen(port, () => {
