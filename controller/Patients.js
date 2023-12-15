@@ -1,482 +1,482 @@
-const Joi = require("joi");
-const Patients = require("../modal/Patients");
-const PatientDto = require("../dto/patientDto");
-var myregexp = /^[0-9a-fA-F]{24}$/;
-const fs = require("fs");
-const { BACKEND_URL_PATH } = require("../config/constants");
-const multer = require("multer");
-const path = require("path");
-const { MongoClient, ObjectId } = require("mongodb");
-const Image = require("../modal/Images");
-const PdfFile = require("../modal/PdfFile");
+// const Joi = require("joi");
+// const Patients = require("../modal/Patients");
+// const PatientDto = require("../dto/patientDto");
+// var myregexp = /^[0-9a-fA-F]{24}$/;
+// const fs = require("fs");
+// const { BACKEND_URL_PATH } = require("../config/constants");
+// const multer = require("multer");
+// const path = require("path");
+// const { MongoClient, ObjectId } = require("mongodb");
+// const Image = require("../modal/Images");
+// const PdfFile = require("../modal/PdfFile");
 
-const crypto = require("crypto");
-const mongoose = require("mongoose");
-const Grid = require("gridfs-stream");
+// const crypto = require("crypto");
+// const mongoose = require("mongoose");
+// const Grid = require("gridfs-stream");
 
-const connection = mongoose.connection;
-const mongo = mongoose.mongo;
-const gfs = Grid(connection, mongo);
+// const connection = mongoose.connection;
+// const mongo = mongoose.mongo;
+// const gfs = Grid(connection, mongo);
 
-function deleteFile(path) {
-  if (path) {
-    fs.unlinkSync(path);
-  }
-}
+// function deleteFile(path) {
+//   if (path) {
+//     fs.unlinkSync(path);
+//   }
+// }
 
-const storage = multer.memoryStorage(); // You can customize the storage as needed
-const fileFilter = (req, file, cb) => {
-  // Implement your own file filtering logic here
-  // Call the callback with true to accept the file, false otherwise
-  cb(null, true);
-};
+// const storage = multer.memoryStorage(); // You can customize the storage as needed
+// const fileFilter = (req, file, cb) => {
+//   // Implement your own file filtering logic here
+//   // Call the callback with true to accept the file, false otherwise
+//   cb(null, true);
+// };
 
-const upload = multer({ storage: storage });
+// const upload = multer({ storage: storage });
 
 
-const handleFileUpload = async (file, collectionName) => {
-  return new Promise((resolve, reject) => {
-    const fileName =
-      crypto.randomBytes(16).toString("hex") + path.extname(file.originalname);
+// const handleFileUpload = async (file, collectionName) => {
+//   return new Promise((resolve, reject) => {
+//     const fileName =
+//       crypto.randomBytes(16).toString("hex") + path.extname(file.originalname);
 
-    const writeStream = gfs.createWriteStream({
-      filename: fileName,
-      contentType: file.mimetype,
-      metadata: { collection: collectionName },
-    });
-    console.log("dddddddddddddddd", writeStream);
+//     const writeStream = gfs.createWriteStream({
+//       filename: fileName,
+//       contentType: file.mimetype,
+//       metadata: { collection: collectionName },
+//     });
+//     console.log("dddddddddddddddd", writeStream);
 
-    writeStream.on("error", (error) => {
-      reject(error);
-    });
+//     writeStream.on("error", (error) => {
+//       reject(error);
+//     });
 
-    writeStream.on("close", (file) => {
-      resolve(file._id.toString());
-    });
+//     writeStream.on("close", (file) => {
+//       resolve(file._id.toString());
+//     });
 
-    writeStream.write(file.buffer);
-    writeStream.end();
-  });
-};
+//     writeStream.write(file.buffer);
+//     writeStream.end();
+//   });
+// };
 
-const PatientsController = {
-  async addPatient(req, res, next) {
-    upload.fields([{ name: "image" }, { name: "pdffile" }])(
-      req,
-      res,
-      async function (err) {
-        if (err) {
-          return next(err);
-        }
+// const PatientsController = {
+//   async addPatient(req, res, next) {
+//     upload.fields([{ name: "image" }, { name: "pdffile" }])(
+//       req,
+//       res,
+//       async function (err) {
+//         if (err) {
+//           return next(err);
+//         }
 
-        const validateData = Joi.object({
-          patient_name: Joi.string().required(),
-          admit_date: Joi.date().required(),
-          patient_cnic: Joi.number().required(),
-          patient_case_type: Joi.string().required(),
-          discharg_date: Joi.string(),
-          user: Joi.string().regex(myregexp).required(),
-        });
+//         const validateData = Joi.object({
+//           patient_name: Joi.string().required(),
+//           admit_date: Joi.date().required(),
+//           patient_cnic: Joi.number().required(),
+//           patient_case_type: Joi.string().required(),
+//           discharg_date: Joi.string(),
+//           user: Joi.string().regex(myregexp).required(),
+//         });
 
-        const { error } = validateData.validate(req.body);
-        if (error) {
-          // Delete files if they were uploaded before validation failed
-          if (req.files && req.files.image) {
-            deleteFile(req.files.image[0].path);
-          }
-          if (req.files && req.files.pdffile) {
-            deleteFile(req.files.pdffile[0].path);
-          }
-          return next(error);
-        }
+//         const { error } = validateData.validate(req.body);
+//         if (error) {
+//           // Delete files if they were uploaded before validation failed
+//           if (req.files && req.files.image) {
+//             deleteFile(req.files.image[0].path);
+//           }
+//           if (req.files && req.files.pdffile) {
+//             deleteFile(req.files.pdffile[0].path);
+//           }
+//           return next(error);
+//         }
 
-        const {
-          patient_name,
-          admit_date,
-          patient_cnic,
-          patient_case_type,
-          discharg_date,
-          user,
-        } = req.body;
+//         const {
+//           patient_name,
+//           admit_date,
+//           patient_cnic,
+//           patient_case_type,
+//           discharg_date,
+//           user,
+//         } = req.body;
 
-        // Handle image and PDF upload using GridFS
-        let imageFileId, pdfFileId;
+//         // Handle image and PDF upload using GridFS
+//         let imageFileId, pdfFileId;
 
-        try {
-          if (req.files && req.files.image) {
-            imageFileId = await handleFileUpload(req.files.image[0], "images");
-            const imageDetails = await Image.findById(imageFileId);
-            console.log("Image Details:", imageDetails);
-          }
+//         try {
+//           if (req.files && req.files.image) {
+//             imageFileId = await handleFileUpload(req.files.image[0], "images");
+//             const imageDetails = await Image.findById(imageFileId);
+//             console.log("Image Details:", imageDetails);
+//           }
 
-          if (req.files && req.files.pdffile) {
-            pdfFileId = await handleFileUpload(req.files.pdffile[0], "pdfs");
-            const pdfDetails = await PdfFile.findById(pdfFileId);
-            console.log("PDF Details:", pdfDetails);
-          }
+//           if (req.files && req.files.pdffile) {
+//             pdfFileId = await handleFileUpload(req.files.pdffile[0], "pdfs");
+//             const pdfDetails = await PdfFile.findById(pdfFileId);
+//             console.log("PDF Details:", pdfDetails);
+//           }
 
-          // Create a new patient with references to the image and PDF
-          let newPatientData = new Patients({
-            patient_name,
-            admit_date,
-            patient_cnic,
-            patient_case_type,
-            discharg_date: discharg_date ? discharg_date : null,
-            user,
-            image: imageFileId || null,
-            pdffile: pdfFileId || null,
-          });
+//           // Create a new patient with references to the image and PDF
+//           let newPatientData = new Patients({
+//             patient_name,
+//             admit_date,
+//             patient_cnic,
+//             patient_case_type,
+//             discharg_date: discharg_date ? discharg_date : null,
+//             user,
+//             image: imageFileId || null,
+//             pdffile: pdfFileId || null,
+//           });
 
-          await newPatientData.save();
-          const newPatient = new PatientDto(newPatientData);
-          return res.status(201).json({ patient: newPatient });
-        } catch (error) {
-          console.log("Error", error);
-          if (imageFileId) {
-            deleteFile(imageFileId);
-          }
+//           await newPatientData.save();
+//           const newPatient = new PatientDto(newPatientData);
+//           return res.status(201).json({ patient: newPatient });
+//         } catch (error) {
+//           console.log("Error", error);
+//           if (imageFileId) {
+//             deleteFile(imageFileId);
+//           }
 
-          if (pdfFileId) {
-            deleteFile(pdfFileId);
-          }
+//           if (pdfFileId) {
+//             deleteFile(pdfFileId);
+//           }
 
-          return next(error);
-        }
-      }
-    );
-  },
+//           return next(error);
+//         }
+//       }
+//     );
+//   },
 
-  async getPatients(req, res, next) {
-    let newPatientData;
-    try {
-      if (req.user.role.toLowerCase() !== "admin") {
-        newPatientData = await Patients.find({
-          patient_case_type: req.user.role.toLowerCase(),
-        });
-      } else {
-        newPatientData = await Patients.find();
-      }
-      return res
-        .status(200)
-        .json({ patients: newPatientData?.length ? newPatientData : [] });
-    } catch (err) {
-      return next(err);
-    }
-  },
-  async updatePatient(req, res, next) {
-    try {
-      const patientId = req.params.patientId;
-      const existingPatient = await Patients.findById(patientId);
+//   async getPatients(req, res, next) {
+//     let newPatientData;
+//     try {
+//       if (req.user.role.toLowerCase() !== "admin") {
+//         newPatientData = await Patients.find({
+//           patient_case_type: req.user.role.toLowerCase(),
+//         });
+//       } else {
+//         newPatientData = await Patients.find();
+//       }
+//       return res
+//         .status(200)
+//         .json({ patients: newPatientData?.length ? newPatientData : [] });
+//     } catch (err) {
+//       return next(err);
+//     }
+//   },
+//   async updatePatient(req, res, next) {
+//     try {
+//       const patientId = req.params.patientId;
+//       const existingPatient = await Patients.findById(patientId);
 
-      if (!existingPatient) {
-        return res.status(404).json({ error: "Patient not found" });
-      }
-      upload.fields([{ name: "image" }, { name: "pdffile" }])(
-        req,
-        res,
-        async function (err) {
-          if (err) {
-            return next(err);
-          }
+//       if (!existingPatient) {
+//         return res.status(404).json({ error: "Patient not found" });
+//       }
+//       upload.fields([{ name: "image" }, { name: "pdffile" }])(
+//         req,
+//         res,
+//         async function (err) {
+//           if (err) {
+//             return next(err);
+//           }
 
-          const validateData = Joi.object({
-            patient_name: Joi.string().required(),
-            admit_date: Joi.date().required(),
-            patient_cnic: Joi.number().required(),
-            patient_case_type: Joi.string().required(),
-            discharg_date: Joi.string(),
-            user: Joi.string().regex(myregexp).required(),
-          });
+//           const validateData = Joi.object({
+//             patient_name: Joi.string().required(),
+//             admit_date: Joi.date().required(),
+//             patient_cnic: Joi.number().required(),
+//             patient_case_type: Joi.string().required(),
+//             discharg_date: Joi.string(),
+//             user: Joi.string().regex(myregexp).required(),
+//           });
 
-          const { error } = validateData.validate(req.body);
-          if (error) {
-            // Delete files if they were uploaded before validation failed
-            if (req.files && req.files.image) {
-              deleteFile(req.files.image[0].path);
-            }
-            if (req.files && req.files.pdffile) {
-              deleteFile(req.files.pdffile[0].path);
-            }
-            return next(error);
-          }
+//           const { error } = validateData.validate(req.body);
+//           if (error) {
+//             // Delete files if they were uploaded before validation failed
+//             if (req.files && req.files.image) {
+//               deleteFile(req.files.image[0].path);
+//             }
+//             if (req.files && req.files.pdffile) {
+//               deleteFile(req.files.pdffile[0].path);
+//             }
+//             return next(error);
+//           }
 
-          const {
-            patient_name,
-            admit_date,
-            patient_cnic,
-            patient_case_type,
-            discharg_date,
-            user,
-          } = req.body;
+//           const {
+//             patient_name,
+//             admit_date,
+//             patient_cnic,
+//             patient_case_type,
+//             discharg_date,
+//             user,
+//           } = req.body;
 
-          let imagePath = existingPatient.image;
-          let pdfFilePath = existingPatient.pdffile;
+//           let imagePath = existingPatient.image;
+//           let pdfFilePath = existingPatient.pdffile;
 
-          // Handle image upload
-          if (req.files && req.files.image) {
-            const imageFile = req.files.image[0];
-            if (
-              imageFile.mimetype !== "image/jpeg" &&
-              imageFile.mimetype !== "image/png"
-            ) {
-              // Throw an error or send a response informing the user about invalid image format
-              return next(new Error("Invalid image format"));
-            }
-            const imageFolder = "images";
-            const oldImageFilename = imagePath
-              ? imagePath.replace(
-                  `${BACKEND_URL_PATH}storage/${imageFolder}/`,
-                  ""
-                )
-              : null;
-            imagePath =
-              `${imageFolder}/image-${Date.now()}` + `-patient-image.png`;
+//           // Handle image upload
+//           if (req.files && req.files.image) {
+//             const imageFile = req.files.image[0];
+//             if (
+//               imageFile.mimetype !== "image/jpeg" &&
+//               imageFile.mimetype !== "image/png"
+//             ) {
+//               // Throw an error or send a response informing the user about invalid image format
+//               return next(new Error("Invalid image format"));
+//             }
+//             const imageFolder = "images";
+//             const oldImageFilename = imagePath
+//               ? imagePath.replace(
+//                   `${BACKEND_URL_PATH}storage/${imageFolder}/`,
+//                   ""
+//                 )
+//               : null;
+//             imagePath =
+//               `${imageFolder}/image-${Date.now()}` + `-patient-image.png`;
 
-            try {
-              // Ensure the folder exists
-              const storageFolderPath = path.join(
-                __dirname,
-                "..",
-                "storage",
-                imageFolder
-              );
+//             try {
+//               // Ensure the folder exists
+//               const storageFolderPath = path.join(
+//                 __dirname,
+//                 "..",
+//                 "storage",
+//                 imageFolder
+//               );
 
-              if (!fs.existsSync(storageFolderPath)) {
-                fs.mkdirSync(storageFolderPath, { recursive: true });
-              }
+//               if (!fs.existsSync(storageFolderPath)) {
+//                 fs.mkdirSync(storageFolderPath, { recursive: true });
+//               }
 
-              // Delete the old image file if it exists
+//               // Delete the old image file if it exists
 
-              if (oldImageFilename) {
-                const localImagePath = path
-                  .join("storage", imageFolder, oldImageFilename)
-                  .replace(/\\/g, "/");
+//               if (oldImageFilename) {
+//                 const localImagePath = path
+//                   .join("storage", imageFolder, oldImageFilename)
+//                   .replace(/\\/g, "/");
 
-                if (fs.existsSync(localImagePath)) {
-                  deleteFile(localImagePath);
-                } else {
-                  console.log(`File does not exist: ${localImagePath}`);
-                }
-              }
+//                 if (fs.existsSync(localImagePath)) {
+//                   deleteFile(localImagePath);
+//                 } else {
+//                   console.log(`File does not exist: ${localImagePath}`);
+//                 }
+//               }
 
-              fs.writeFileSync(`storage/${imagePath}`, imageFile.buffer);
-            } catch (error) {
-              // Delete the file if an error occurs
-              deleteFile(imageFile.path);
-              return next(error);
-            }
-          }
+//               fs.writeFileSync(`storage/${imagePath}`, imageFile.buffer);
+//             } catch (error) {
+//               // Delete the file if an error occurs
+//               deleteFile(imageFile.path);
+//               return next(error);
+//             }
+//           }
 
-          // Handle pdffile upload
-          if (req.files && req.files.pdffile) {
-            const pdfFile = req.files.pdffile[0];
-            const isPdf = req.files.pdffile[0].mimetype === "application/pdf";
-            if (!isPdf) {
-              return next(new Error("Invalid pdf format"));
-            }
+//           // Handle pdffile upload
+//           if (req.files && req.files.pdffile) {
+//             const pdfFile = req.files.pdffile[0];
+//             const isPdf = req.files.pdffile[0].mimetype === "application/pdf";
+//             if (!isPdf) {
+//               return next(new Error("Invalid pdf format"));
+//             }
 
-            const pdfFolder = "pdfs";
-            const pdfFileRelativePath = path
-              .join("storage", pdfFolder)
-              .replace(/\\/g, "/");
+//             const pdfFolder = "pdfs";
+//             const pdfFileRelativePath = path
+//               .join("storage", pdfFolder)
+//               .replace(/\\/g, "/");
 
-            try {
-              if (!fs.existsSync(pdfFileRelativePath)) {
-                fs.mkdirSync(pdfFileRelativePath);
-              }
+//             try {
+//               if (!fs.existsSync(pdfFileRelativePath)) {
+//                 fs.mkdirSync(pdfFileRelativePath);
+//               }
 
-              // Delete the old pdf file if it exists
-              if (pdfFilePath) {
-                const urlParts = pdfFilePath.split("/");
-                const fileName = urlParts[urlParts.length - 1];
+//               // Delete the old pdf file if it exists
+//               if (pdfFilePath) {
+//                 const urlParts = pdfFilePath.split("/");
+//                 const fileName = urlParts[urlParts.length - 1];
 
-                const localFilePath = path
-                  .join("storage/", "pdfs", fileName)
-                  .replace(/\\/g, "/");
+//                 const localFilePath = path
+//                   .join("storage/", "pdfs", fileName)
+//                   .replace(/\\/g, "/");
 
-                if (fs.existsSync(localFilePath)) {
-                  deleteFile(localFilePath);
-                } else {
-                  console.log(`File does not exist: ${localFilePath}`);
-                }
-              }
+//                 if (fs.existsSync(localFilePath)) {
+//                   deleteFile(localFilePath);
+//                 } else {
+//                   console.log(`File does not exist: ${localFilePath}`);
+//                 }
+//               }
 
-              // Generate a new unique filename
-              const pdfFileName = `pdf-${Date.now()}.pdf`;
-              pdfFilePath = path
-                .join("storage", pdfFolder, pdfFileName)
-                .replace(/\\/g, "/");
+//               // Generate a new unique filename
+//               const pdfFileName = `pdf-${Date.now()}.pdf`;
+//               pdfFilePath = path
+//                 .join("storage", pdfFolder, pdfFileName)
+//                 .replace(/\\/g, "/");
 
-              fs.writeFileSync(pdfFilePath, pdfFile.buffer);
-            } catch (error) {
-              // Delete the file if an error occurs
-              deleteFile(pdfFile.path);
-              return next(error);
-            }
-          }
+//               fs.writeFileSync(pdfFilePath, pdfFile.buffer);
+//             } catch (error) {
+//               // Delete the file if an error occurs
+//               deleteFile(pdfFile.path);
+//               return next(error);
+//             }
+//           }
 
-          existingPatient.patient_name = patient_name;
-          existingPatient.admit_date = admit_date;
-          existingPatient.patient_cnic = patient_cnic;
-          existingPatient.patient_case_type = patient_case_type;
-          existingPatient.discharg_date = discharg_date
-            ? discharg_date
-            : existingPatient.discharg_date;
-          existingPatient.user = user;
+//           existingPatient.patient_name = patient_name;
+//           existingPatient.admit_date = admit_date;
+//           existingPatient.patient_cnic = patient_cnic;
+//           existingPatient.patient_case_type = patient_case_type;
+//           existingPatient.discharg_date = discharg_date
+//             ? discharg_date
+//             : existingPatient.discharg_date;
+//           existingPatient.user = user;
 
-          // Handle image upload
-          if (req.files && req.files.image) {
-            existingPatient.image = imagePath
-              ? `${BACKEND_URL_PATH}storage/${imagePath}`
-              : existingPatient.image;
-          }
-          if (req.files && req.files.pdffile) {
-            existingPatient.pdffile = pdfFilePath
-              ? `${BACKEND_URL_PATH}${pdfFilePath}`
-              : existingPatient.pdffile;
-          }
+//           // Handle image upload
+//           if (req.files && req.files.image) {
+//             existingPatient.image = imagePath
+//               ? `${BACKEND_URL_PATH}storage/${imagePath}`
+//               : existingPatient.image;
+//           }
+//           if (req.files && req.files.pdffile) {
+//             existingPatient.pdffile = pdfFilePath
+//               ? `${BACKEND_URL_PATH}${pdfFilePath}`
+//               : existingPatient.pdffile;
+//           }
 
-          await existingPatient.save();
+//           await existingPatient.save();
 
-          const updatedPatient = new PatientDto(existingPatient);
-          return res.status(200).json({ patient: updatedPatient });
-        }
-      );
-    } catch (error) {
-      return next(error);
-    }
-  },
+//           const updatedPatient = new PatientDto(existingPatient);
+//           return res.status(200).json({ patient: updatedPatient });
+//         }
+//       );
+//     } catch (error) {
+//       return next(error);
+//     }
+//   },
 
-  // async postById(req, res, next) {
-  //   var validateData = Joi.object({
-  //     id: Joi.string().regex(myregexp).required(),
-  //   });
-  //   const { error } = validateData.validate(req.params);
-  //   if (error) {
-  //     next(error);
-  //   }
-  //   const id = req.params.id;
-  //   let newPostData;
-  //   try {
-  //     newPostData = await Post.findById({ _id: id })
-  //       .populate("author")
-  //       .populate("comments");
-  //     if (!newPostData) {
-  //       let error = {
-  //         status: 400,
-  //         message: "not found post",
-  //       };
-  //       return next(error);
-  //     }
-  //   } catch (err) {
-  //     return next(err);
-  //   }
-  //   const newPost = new PostDtoById(newPostData);
-  //   return res.status(200).json({ post: newPost });
-  // },
-  // async postDelete(req, res, next) {
-  //   var validateData = Joi.object({
-  //     id: Joi.string().regex(myregexp).required(),
-  //   });
-  //   const { error } = validateData.validate(req.params);
-  //   if (error) {
-  //     next(error);
-  //   }
-  //   const id = req.params.id;
-  //   let newPostData;
-  //   try {
-  //     newPostData = await Post.findByIdAndDelete({ _id: id });
-  //     if (!newPostData) {
-  //       let error = {
-  //         status: 400,
-  //         message: "not found post",
-  //       };
-  //       return next(error);
-  //     }
-  //     await Comment.deleteMany({ post: id });
-  //     await Likes.deleteMany({ post: id });
-  //   } catch (err) {
-  //     return next(err);
-  //   }
-  //   // const newPost = new PostDtoById(newPostData);
-  //   return res.status(200).json({ post: { message: "deleteed" } });
-  // },
-  // async updatePosts(req, res, next) {
-  //   var validateData = Joi.object({
-  //     content: Joi.string(),
-  //     title: Joi.string(),
-  //     author: Joi.string().regex(myregexp).required(),
-  //     image: Joi.string(),
-  //   });
-  //   const { error } = validateData.validate(req.body);
-  //   if (error) {
-  //     next(error);
-  //   }
-  //   const id = req.params.id;
+//   // async postById(req, res, next) {
+//   //   var validateData = Joi.object({
+//   //     id: Joi.string().regex(myregexp).required(),
+//   //   });
+//   //   const { error } = validateData.validate(req.params);
+//   //   if (error) {
+//   //     next(error);
+//   //   }
+//   //   const id = req.params.id;
+//   //   let newPostData;
+//   //   try {
+//   //     newPostData = await Post.findById({ _id: id })
+//   //       .populate("author")
+//   //       .populate("comments");
+//   //     if (!newPostData) {
+//   //       let error = {
+//   //         status: 400,
+//   //         message: "not found post",
+//   //       };
+//   //       return next(error);
+//   //     }
+//   //   } catch (err) {
+//   //     return next(err);
+//   //   }
+//   //   const newPost = new PostDtoById(newPostData);
+//   //   return res.status(200).json({ post: newPost });
+//   // },
+//   // async postDelete(req, res, next) {
+//   //   var validateData = Joi.object({
+//   //     id: Joi.string().regex(myregexp).required(),
+//   //   });
+//   //   const { error } = validateData.validate(req.params);
+//   //   if (error) {
+//   //     next(error);
+//   //   }
+//   //   const id = req.params.id;
+//   //   let newPostData;
+//   //   try {
+//   //     newPostData = await Post.findByIdAndDelete({ _id: id });
+//   //     if (!newPostData) {
+//   //       let error = {
+//   //         status: 400,
+//   //         message: "not found post",
+//   //       };
+//   //       return next(error);
+//   //     }
+//   //     await Comment.deleteMany({ post: id });
+//   //     await Likes.deleteMany({ post: id });
+//   //   } catch (err) {
+//   //     return next(err);
+//   //   }
+//   //   // const newPost = new PostDtoById(newPostData);
+//   //   return res.status(200).json({ post: { message: "deleteed" } });
+//   // },
+//   // async updatePosts(req, res, next) {
+//   //   var validateData = Joi.object({
+//   //     content: Joi.string(),
+//   //     title: Joi.string(),
+//   //     author: Joi.string().regex(myregexp).required(),
+//   //     image: Joi.string(),
+//   //   });
+//   //   const { error } = validateData.validate(req.body);
+//   //   if (error) {
+//   //     next(error);
+//   //   }
+//   //   const id = req.params.id;
 
-  //   let newPostId;
-  //   try {
-  //     newPostId = await Post.findOne({ _id: id });
-  //     if (!newPostId) {
-  //       let error = {
-  //         status: 400,
-  //         message: "not found post",
-  //       };
-  //       return next(error);
-  //     }
-  //   } catch (err) {
-  //     return next(err);
-  //   }
-  //   const { title, content, author, image } = req.body;
+//   //   let newPostId;
+//   //   try {
+//   //     newPostId = await Post.findOne({ _id: id });
+//   //     if (!newPostId) {
+//   //       let error = {
+//   //         status: 400,
+//   //         message: "not found post",
+//   //       };
+//   //       return next(error);
+//   //     }
+//   //   } catch (err) {
+//   //     return next(err);
+//   //   }
+//   //   const { title, content, author, image } = req.body;
 
-  //   let newPostData;
+//   //   let newPostData;
 
-  //   if (image) {
-  //     let prveiousImage = newPostId.image;
-  //     prveiousImage = prveiousImage.split("/").at(-1);
-  //     fs.unlinkSync(`storage/${prveiousImage}`);
+//   //   if (image) {
+//   //     let prveiousImage = newPostId.image;
+//   //     prveiousImage = prveiousImage.split("/").at(-1);
+//   //     fs.unlinkSync(`storage/${prveiousImage}`);
 
-  //     const buffer = Buffer.from(
-  //       image.replace(/^data:image\/(png|jpg|jpeg);base64,/, ""),
-  //       "base64"
-  //     );
-  //     const imageNewPath = `image-${Date.now()}` + `${author}.png`;
-  //     try {
-  //       fs.writeFileSync(`storage/${imageNewPath}`, buffer);
-  //     } catch (error) {
-  //       return next(error);
-  //     }
-  //     try {
-  //       newPostData = await Post.findOneAndUpdate(
-  //         { _id: id },
-  //         {
-  //           title,
-  //           content,
-  //           author,
-  //           image: `${BACKEND_URL_PATH}storage/${imageNewPath}`,
-  //         },
-  //         {
-  //           new: true,
-  //         }
-  //       );
-  //     } catch (err) {
-  //       return next(err);
-  //     }
-  //   } else {
-  //     try {
-  //       newPostData = await Post.updateOne(
-  //         { _id: id },
-  //         { title, content, author },
-  //         {
-  //           new: true,
-  //         }
-  //       );
-  //     } catch (err) {
-  //       return next(err);
-  //     }
-  //   }
-  //   const newPost = new PostDto(newPostData);
-  //   return res.status(200).json({ post: newPost });
-  // },
-};
-module.exports = PatientsController;
+//   //     const buffer = Buffer.from(
+//   //       image.replace(/^data:image\/(png|jpg|jpeg);base64,/, ""),
+//   //       "base64"
+//   //     );
+//   //     const imageNewPath = `image-${Date.now()}` + `${author}.png`;
+//   //     try {
+//   //       fs.writeFileSync(`storage/${imageNewPath}`, buffer);
+//   //     } catch (error) {
+//   //       return next(error);
+//   //     }
+//   //     try {
+//   //       newPostData = await Post.findOneAndUpdate(
+//   //         { _id: id },
+//   //         {
+//   //           title,
+//   //           content,
+//   //           author,
+//   //           image: `${BACKEND_URL_PATH}storage/${imageNewPath}`,
+//   //         },
+//   //         {
+//   //           new: true,
+//   //         }
+//   //       );
+//   //     } catch (err) {
+//   //       return next(err);
+//   //     }
+//   //   } else {
+//   //     try {
+//   //       newPostData = await Post.updateOne(
+//   //         { _id: id },
+//   //         { title, content, author },
+//   //         {
+//   //           new: true,
+//   //         }
+//   //       );
+//   //     } catch (err) {
+//   //       return next(err);
+//   //     }
+//   //   }
+//   //   const newPost = new PostDto(newPostData);
+//   //   return res.status(200).json({ post: newPost });
+//   // },
+// };
+// module.exports = PatientsController;
