@@ -4,6 +4,19 @@ const UserController = require("../controller/User");
 const PostController = require("../controller/Posts");
 const TaskController = require("../controller/Tasks");
 const PatientsController = require("../controller/Patients");
+const mongoose = require('mongoose');
+const multer = require('multer');
+const path = require('path');
+const Image = require("../modal/Images");
+
+const storage = multer.diskStorage({
+  destination: './uploads/',
+  filename: function (req, file, cb) {
+    cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+  },
+});
+
+const upload = multer({ storage: storage });
 
 
 // const postControler = require("../controler/postControler");
@@ -23,9 +36,9 @@ router.post("/register", UserController.register);
 router.post("/login", UserController.login);
 router.post("/reset-password", UserController.sendResetEmail);
 
-router.post("/patient",auth, PatientsController.addPatient);
-router.get("/patient",auth,  PatientsController.getPatients);
-router.patch("/patient/:patientId",auth,  PatientsController.updatePatient);
+// router.post("/patient",auth, PatientsController.addPatient);
+// router.get("/patient",auth,  PatientsController.getPatients);
+// router.patch("/patient/:patientId",auth,  PatientsController.updatePatient);
 
 
 router.get("/post", auth, PostController.getPosts);
@@ -36,6 +49,23 @@ router.patch("/post/:id", auth, PostController.updatePosts);
 router.post("/comment", auth, PostController.commentPost);
 router.get("/comment", auth, PostController.commentList);
 router.post("/like_post", auth, PostController.postLike);
+
+router.post('/upload', upload.single('image'), async (req, res) => {
+  try {
+    // Save the image information to MongoDB using your Image model
+    const newImage = new Image({
+      filename: req.file.filename,
+      contentType: req.file.mimetype,
+      uploadDate: new Date(),
+    });
+    await newImage.save();
+
+    res.status(200).json({ message: 'Image uploaded successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
 router.get("/user", UserController.googleLogin);
 router.post("/task", auth, TaskController.addTask);

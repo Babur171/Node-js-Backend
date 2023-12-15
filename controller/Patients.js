@@ -6,14 +6,58 @@ const fs = require("fs");
 const { BACKEND_URL_PATH } = require("../config/constants");
 const multer = require("multer");
 const path = require("path");
-const storage = multer.memoryStorage(); // Store files in memory
-const upload = multer({ storage: storage });
+const { MongoClient, ObjectId } = require("mongodb");
+const Image = require("../modal/Images");
+const PdfFile = require("../modal/PdfFile");
+
+const crypto = require("crypto");
+const mongoose = require("mongoose");
+const Grid = require("gridfs-stream");
+
+const connection = mongoose.connection;
+const mongo = mongoose.mongo;
+const gfs = Grid(connection, mongo);
 
 function deleteFile(path) {
   if (path) {
     fs.unlinkSync(path);
   }
 }
+
+const storage = multer.memoryStorage(); // You can customize the storage as needed
+const fileFilter = (req, file, cb) => {
+  // Implement your own file filtering logic here
+  // Call the callback with true to accept the file, false otherwise
+  cb(null, true);
+};
+
+const upload = multer({ storage: storage });
+
+
+const handleFileUpload = async (file, collectionName) => {
+  return new Promise((resolve, reject) => {
+    const fileName =
+      crypto.randomBytes(16).toString("hex") + path.extname(file.originalname);
+
+    const writeStream = gfs.createWriteStream({
+      filename: fileName,
+      contentType: file.mimetype,
+      metadata: { collection: collectionName },
+    });
+    console.log("dddddddddddddddd", writeStream);
+
+    writeStream.on("error", (error) => {
+      reject(error);
+    });
+
+    writeStream.on("close", (file) => {
+      resolve(file._id.toString());
+    });
+
+    writeStream.write(file.buffer);
+    writeStream.end();
+  });
+};
 
 const PatientsController = {
   async addPatient(req, res, next) {
@@ -31,7 +75,6 @@ const PatientsController = {
           patient_cnic: Joi.number().required(),
           patient_case_type: Joi.string().required(),
           discharg_date: Joi.string(),
-
           user: Joi.string().regex(myregexp).required(),
         });
 
@@ -56,83 +99,49 @@ const PatientsController = {
           user,
         } = req.body;
 
-        let imagePath, pdfFilePath;
+        // Handle image and PDF upload using GridFS
+        let imageFileId, pdfFileId;
 
-        // Handle image upload
-        if (req.files && req.files.image) {
-          const imageFile = req.files.image[0];
-          if (
-            imageFile.mimetype !== "image/jpeg" &&
-            imageFile.mimetype !== "image/png"
-          ) {
-            return next(new Error("Invalid image format"));
-          }
-
-          const imageFolder = "images";
-          imagePath =
-            `${imageFolder}/image-${Date.now()}` + `-patient-image.png`;
-
-          try {
-            // Ensure the folder exists
-            if (!fs.existsSync(`/tmp/${imageFolder}`)) {
-              fs.mkdirSync(`/tmp/${imageFolder}`);
-            }
-
-            fs.writeFileSync(`/tmp/${imagePath}`, imageFile.buffer);
-          } catch (error) {
-            deleteFile(imageFile.path);
-            return next(error);
-          }
-        }
-
-        // Handle pdffile upload
-        if (req.files && req.files.pdffile) {
-          const pdfFile = req.files.pdffile[0];
-          const isPdf = req.files.pdffile[0].mimetype === "application/pdf";
-          if (!isPdf) {
-            return next(new Error("Invalid pdf format"));
-          }
-
-          const pdfFolder = "pdfs";
-          
-          pdfFilePath =`${pdfFolder}/pdf-${Date.now()}-patient.pdf`;
-          try {
-            // Ensure the folder exists
-
-            if (!fs.existsSync(`/tmp/${pdfFolder}`)) {
-              fs.mkdirSync(`/tmp/${pdfFolder}`);
-            }
-
-            fs.writeFileSync(`/tmp/${pdfFilePath}`, pdfFile.buffer);
-          } catch (error) {
-            // Delete the file if an error occurs
-            deleteFile(pdfFile.path);
-            return next(error);
-          }
-        }
-
-        let newPatientData;
         try {
-          newPatientData = new Patients({
+          if (req.files && req.files.image) {
+            imageFileId = await handleFileUpload(req.files.image[0], "images");
+            const imageDetails = await Image.findById(imageFileId);
+            console.log("Image Details:", imageDetails);
+          }
+
+          if (req.files && req.files.pdffile) {
+            pdfFileId = await handleFileUpload(req.files.pdffile[0], "pdfs");
+            const pdfDetails = await PdfFile.findById(pdfFileId);
+            console.log("PDF Details:", pdfDetails);
+          }
+
+          // Create a new patient with references to the image and PDF
+          let newPatientData = new Patients({
             patient_name,
             admit_date,
             patient_cnic,
             patient_case_type,
             discharg_date: discharg_date ? discharg_date : null,
             user,
-            image: imagePath ? `${BACKEND_URL_PATH}storage/${imagePath}` : null,
-            pdffile: pdfFilePath ? `${BACKEND_URL_PATH}storage/${pdfFilePath}` : null,
+            image: imageFileId || null,
+            pdffile: pdfFileId || null,
           });
-          await newPatientData.save();
-        } catch (err) {
-          // Delete the files if an error occurs
-          deleteFile(`storage/${imagePath}`);
-          deleteFile(pdfFilePath);
-          return next(err);
-        }
 
-        const newPatient = new PatientDto(newPatientData);
-        return res.status(201).json({ patient: newPatient });
+          await newPatientData.save();
+          const newPatient = new PatientDto(newPatientData);
+          return res.status(201).json({ patient: newPatient });
+        } catch (error) {
+          console.log("Error", error);
+          if (imageFileId) {
+            deleteFile(imageFileId);
+          }
+
+          if (pdfFileId) {
+            deleteFile(pdfFileId);
+          }
+
+          return next(error);
+        }
       }
     );
   },
@@ -231,17 +240,16 @@ const PatientsController = {
                 "storage",
                 imageFolder
               );
-              
+
               if (!fs.existsSync(storageFolderPath)) {
                 fs.mkdirSync(storageFolderPath, { recursive: true });
               }
 
               // Delete the old image file if it exists
-           
+
               if (oldImageFilename) {
                 const localImagePath = path
-                  .join("storage", imageFolder,
-                  oldImageFilename)
+                  .join("storage", imageFolder, oldImageFilename)
                   .replace(/\\/g, "/");
 
                 if (fs.existsSync(localImagePath)) {

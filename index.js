@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const connectDB = require("./config/db");
 const router = require("./routers/index");
+
 const errorHandler = require("./errorHandler/index");
 // const passport = require("./social/passport");
 const { PORT } = require("./config/constants");
@@ -36,7 +37,7 @@ app.use(router);
 
 connectDB();
 
-app.use("/storage", express.static("storage"));
+
 app.use(errorHandler);
 
 app.listen(port, () => {
