@@ -9,7 +9,8 @@ var PatientsSchema = new Schema({
   discharg_date: { type: Date, require: true },
   patient_cnic: { type: Number, require: true },
   patient_case_type:{ type: String, require: true },
-  pdffile:{ type: String, require: true },
+  image: { type:  mongoose.SchemaTypes.ObjectId, ref: 'Images' },
+  pdffile: { type:  mongoose.SchemaTypes.ObjectId, ref: 'PdfFile' },
 
 });
 module.exports = mongoose.model("Patients", PatientsSchema, "patients");
