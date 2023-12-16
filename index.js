@@ -23,6 +23,8 @@ app.use(
     saveUninitialized: true,
   })
 );
+app.use('/uploads', express.static('uploads')); // Serve static files
+
 
 // Initialize Passport
 // app.use(passport.initialize());
