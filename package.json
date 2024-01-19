@@ -37,8 +37,8 @@
     "multer": "^1.4.5-lts.1",
     "multer-s3": "^3.0.1",
     "netlify-lambda": "^2.0.16",
+    "random-bytes": "^1.0.0",
     "serverless-http": "^3.2.0",
-    "streamsearch": "^1.1.0",
     "uuid": "^9.0.1"
   }
 }
