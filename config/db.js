@@ -1,9 +1,9 @@
 const mongoose = require("mongoose");
-const { MONOBBFILE } = require("./constants");
+const { DATABASE } = require("./constants");
 
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(MONOBBFILE, {
+    const conn = await mongoose.connect(DATABASE, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });

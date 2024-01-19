@@ -1,31 +1,28 @@
 require("dotenv").config();
 
 const PORT = process.env.PORT;
-const MONOBBFILE = process.env.DATABASE;
+const DATABASE = process.env.DATABASE;
 const SECRETTOKEN = process.env.SECRETTOKEN;
 const REFRESHTOKEN = process.env.REFRESHTOKEN;
-const BACKEND_URL_PATH = process.env.BACKEND_URL_PATH;
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
-const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+const BACKEND_URL_PATH = 'http://ec2-100-27-21-230.compute-1.amazonaws.com';
 const SESSION_SECRET = process.env.SESSION_SECRET;
-const PROJECT_ID = process.env.PROJECT_ID;
-const PRIVATE_KEY_ID = process.env.PRIVATE_KEY_ID;
-const PRIVATE_KEY = process.env.PRIVATE_KEY;
-const CLIENT_EMAIL = process.env.CLIENT_EMAIL;
-const CLIENT_ID = process.env.CLIENT_ID;
+const SENDGRID_KEY = process.env.SENDGRID_KEY;
+const SENDER_EMAIL_ADDRESS = process.env.SENDER_EMAIL;
+const S3_ACCESS_KEY_ID = process.env.S3_ACCESS_KEY_ID;
+const SECRET_ACCESS_KEY = process.env.SECRET_ACCESS_KEY;
+const REGION = process.env.REGION;
+
 
 module.exports = {
   PORT,
-  MONOBBFILE,
+  DATABASE,
   SECRETTOKEN,
   REFRESHTOKEN,
   BACKEND_URL_PATH,
-  GOOGLE_CLIENT_ID,
-  GOOGLE_CLIENT_SECRET,
   SESSION_SECRET,
-  CLIENT_ID,
-  CLIENT_EMAIL,
-  PRIVATE_KEY,
-  PRIVATE_KEY_ID,
-  PROJECT_ID,
+  SENDGRID_KEY,
+  SENDER_EMAIL_ADDRESS,
+  S3_ACCESS_KEY_ID,
+  SECRET_ACCESS_KEY,
+  REGION
 };

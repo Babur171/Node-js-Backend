@@ -2,6 +2,7 @@ const User = require("../modal/User");
 const asyncHandler = require("express-async-handler");
 const jwt = require("jsonwebtoken");
 const { SECRETTOKEN } = require("../config/constants");
+const {responseData} = require("../utiles/index")
 
 const auth = asyncHandler(async (req, res, next) => {
   let token;
@@ -17,20 +18,22 @@ const auth = asyncHandler(async (req, res, next) => {
 
       next();
     } catch (err) {
-      const error = {
+      const response = responseData({
+        success: false,
+        message:"UnAuthorized",
         status: 401,
-        message: "UnAuthorized",
-      };
-      return next(error);
+      });
+      return res.status(401).json(response);
     }
   }
 
   if (!token) {
-    const error = {
+    const response = responseData({
+      success: false,
+      message:"UnAuthorized",
       status: 401,
-      message: "UnAuthorized",
-    };
-    return next(error);
+    });
+    return res.status(401).json(response);
   }
 });
 
